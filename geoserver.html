@@ -1,0 +1,220 @@
+<!doctype html>	
+<html lang="en">
+	<head>	
+		<link rel="stylesheet" href="./css/ol.css" type="text/css">
+		<link rel="stylesheet" href="./css/layertree.css" type="text/css">
+		<link rel="stylesheet" href="./css/style.css" type="text/css">
+		<script src="./js/jquery-1.9.1.min.js" type="text/javascript"></script> 
+		<script src="./js/ol.js" type="text/javascript"></script>
+		<script src="./js/layertree.js" type="text/javascript"></script>
+
+		<title>Map Wizard</title>
+		
+		<script type='text/javascript'>
+		//Map initialization
+		function init() {
+			document.removeEventListener('DOMContentLoaded', init);
+			//Create map in layertree
+			map = new ol.Map({
+				target: 'map',
+				layers: [
+					//Map layer  
+					/*new ol.layer.Vector({
+						title: 'added Layer',
+						source: new ol.source.Vector({
+							projection : 'EPSG:4326',
+							url: './geojson/world.geojson',
+							crossOrigin: 'anonymous',
+							format: new ol.format.GeoJSON()
+						}),
+						name: 'World'
+					}),*/
+					new ol.layer.Tile({
+						source: new ol.source.TileWMS({
+							url: 'http://localhost:8080/geoserver/wms',
+							params: {
+								layers: 'MapWizard:World',
+							},
+							crossOrigin: 'anonymous',
+							projection : 'EPSG:4326',
+							serverType: 'geoserver',                    
+						}),
+						name: 'World'
+					}),
+					new ol.layer.Tile({
+						source: new ol.source.TileWMS({
+							url: 'http://localhost:8080/geoserver/wms',
+							params: {
+								layers: 'MapWizard:Greece2',
+							},
+							crossOrigin: 'anonymous',
+							projection : 'EPSG:4326',
+							serverType: 'geoserver',                    
+						}),
+						name: 'Greece2'
+					}),
+					new ol.layer.Tile({
+						source: new ol.source.TileWMS({
+							url: 'http://localhost:8080/geoserver/wms',
+							params: {
+								layers: 'MapWizard:Greece',
+							},
+							crossOrigin: 'anonymous',
+							projection : 'EPSG:2100',
+							serverType: 'geoserver',                    
+						}),
+						name: 'Greece'
+					}),
+					new ol.layer.Tile({
+						source: new ol.source.TileWMS({
+							url: 'http://localhost:8080/geoserver/wms',
+							params: {
+								layers: 'MapWizard:Coastline',
+							},
+							crossOrigin: 'anonymous',
+							projection : 'EPSG:2100',
+							serverType: 'geoserver',                    
+						}),
+						name: 'Coastline'
+					})
+				],
+				view: new ol.View({
+					//Map center to Athens
+					center: ol.proj.fromLonLat([23.75, 38]),
+					zoom: 7
+				}),
+				controls: []
+			});
+
+			//Initial layers
+			var tree = new layerTree({map: map, target: 'layertree', messages: 'messageBar'})
+				.createRegistry(map.getLayers().item(0))
+				.createRegistry(map.getLayers().item(1))
+				.createRegistry(map.getLayers().item(2))
+				.createRegistry(map.getLayers().item(3));
+			document.getElementById('addwms_form').addEventListener('submit', function (evt) {
+				evt.preventDefault();
+				tree.addWmsLayer(this);
+				this.parentNode.style.display = 'none';
+			});
+			
+			//Map contols  
+			//variables not globals
+			scaleline = new ol.control.ScaleLine();
+			scalelineBt = new ol.control.S({
+				target: 'toolbar'
+			});
+			zoom = new ol.control.Zoom();
+			zoomslider = new ol.control.ZoomSlider();
+			zoomBt = new ol.control.Z({
+				target: 'toolbar'
+			});
+			var mouseposition = new ol.control.MousePosition({
+				coordinateFormat: function (coordinates) {
+					var coord_x = coordinates[0].toFixed(3);
+					var coord_y = coordinates[1].toFixed(3);
+					return 'Coordinates (X,Y): ' + coord_x + ', ' + coord_y;
+				},
+				target: 'coordinates'
+			});
+			var printBt = new ol.control.Print({
+				target: 'toolbar'
+			});
+			
+			map.addControl(scaleline);
+			map.addControl(scalelineBt);
+			map.addControl(zoom);
+			map.addControl(zoomslider);
+			map.addControl(zoomBt);
+			map.addControl(mouseposition);
+			map.addControl(printBt);
+		}
+		document.addEventListener('DOMContentLoaded', init);
+		
+		//Radio button control
+		$(function() {
+			window.invalidate_input = function() {
+				var dt = $('input[name=dataType]:checked').val();
+				var ht = $('input[name=hierarchyData]:checked').val();
+				if (dt == "Area" && ht == "Ordered_Interval")
+				{
+					$('#processedData1').removeAttr('disabled');
+					$('#processedData2').removeAttr('disabled');
+				}            
+				else
+				{
+					$('#processedData1').attr('disabled', 'disabled');
+					$('#processedData2').attr('disabled', 'disabled');
+				}
+			};			
+			$("input[name=dataType]").change(invalidate_input);
+			$("input[name=hierarchyData]").change(invalidate_input);			
+			invalidate_input();
+		});
+		</script>
+	</head>
+	<body>
+	
+	<!-- Visualization -->
+	<div id="header">
+		<div id="title">
+			<h1>Map Wizard</h1>			
+		</div>
+		<div id="logo">
+			<img src="./css/images/logo.jpg" alt="logo" >
+		</div>
+		<div id="button">
+			<input type="button" value="Preset Data" onclick="window.location.href='./index.html'">
+			<input type="button" value="Geoserver" onclick="window.location.href='./geoserver.html'">
+			<input type="button" value="Custom Data" onclick="window.location.href='./custom.html'">			
+			<input type="button" value="Info" onclick="window.location.href='./info.html'">
+		</div>
+	</div>
+	<div class="map-container">
+		<h1 class="slogan">Geoserver Wizard</h1>	
+	<div id="toolbar" class="toolbar"></div>
+		<div id="layertree" class="layertree"></div>
+		<div id="map" class="map">
+			<!--div class="nosupport">Your browser doesn't seem to support this application. Please, update it.</div-->
+		</div>
+		<div class="notification-bar">
+			<div id="messageBar" class="message-bar">Use <code>Alt+Shift+Drag</code> to rotate the map.</div>
+			<div id="coordinates"></div>
+		</div>
+	</div>
+	<div id="addvector" class="toggleable" style="display: none;">
+		<form id="addwms_form" class="addlayer">
+			<p>Create layers</p>
+			<table>
+				<tr>
+					<td>Data Type:</td>
+					<td><input name="dataType" type="radio" value="Points" required="required">Points
+						<input name="dataType" type="radio" value="Lines">Lines
+						<input name="dataType" type="radio" value="Area">Area
+					</td>
+				</tr>
+				<tr>
+					<td>Hierarchy:</td>
+					<td><input name="hierarchyData" type="radio" value="Nominal" required="required">Nominal
+						<input name="hierarchyData" type="radio" value="Ordered_Interval">Ordered/Interval
+					</td>
+				</tr>
+				<tr>
+					<td>Processed:</td>
+					<td><input name="processedData" id="processedData1" type="radio" value="Primary" required="required" disabled>Primary
+						<input name="processedData" id="processedData2" type="radio" value="Produced" disabled>Produced
+					</td>
+				</tr>
+				<tr>
+					<td><input type="submit" value="Submit"></td>
+					<td><input type="button" value="Cancel" onclick="this.form.parentNode.style.display = 'none'"></td>
+				</tr>
+			</table>
+		</form>
+	</div>	
+	<div id="footer">
+		Copyright &copy; Lampakis Mironas. All rights reserved.<br>
+		Supervised by Dr. Krassanakis Basileios, Dr. Tsatsaris Andreas.	
+	</div>	
+  </body>
+</html>

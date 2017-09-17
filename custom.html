@@ -1,0 +1,143 @@
+<!doctype html>	
+<html lang="en">
+	<head>	
+		<link rel="stylesheet" href="./css/ol.css" type="text/css">
+		<link rel="stylesheet" href="./css/layertree.css" type="text/css">
+		<link rel="stylesheet" href="./css/style.css" type="text/css">		
+		<script src="./js/ol.js" type="text/javascript"></script>
+		<script src="./js/layertree.js" type="text/javascript"></script>
+
+		<title>Map Wizard</title>
+		
+		<script type='text/javascript'>
+		
+		//Map initialization
+		function init() {
+			document.removeEventListener('DOMContentLoaded', init);
+			//Create map in layertree
+			map = new ol.Map({
+				target: 'map',
+				layers: [
+					//Map layer
+					new ol.layer.Tile({
+						source: new ol.source.OSM(),
+						name: 'Map'
+					})
+				],
+				view: new ol.View({
+					//Map center to Athens
+					center: ol.proj.fromLonLat([23.75, 38]),
+					zoom: 7
+				}),
+				controls: []
+			});
+			
+			//Initial layers
+			var tree = new layerTree({map: map, target: 'layertree', messages: 'messageBar'})
+				.createRegistry(map.getLayers().item(0));
+			document.getElementById('addvector_form').addEventListener('submit', function (evt) {
+				evt.preventDefault();
+				tree.addVectorLayer(this);
+				this.parentNode.style.display = 'none';
+			});
+			  
+			//Map contols  
+			//variables not globals
+			scaleline = new ol.control.ScaleLine();
+			scalelineBt = new ol.control.S({
+				target: 'toolbar'
+			});
+			zoom = new ol.control.Zoom();
+			zoomslider = new ol.control.ZoomSlider();
+			zoomBt = new ol.control.Z({
+				target: 'toolbar'
+			});
+			var mouseposition = new ol.control.MousePosition({
+				coordinateFormat: function (coordinates) {
+					var coord_x = coordinates[0].toFixed(3);
+					var coord_y = coordinates[1].toFixed(3);
+					return 'Coordinates (X,Y): ' + coord_x + ', ' + coord_y;
+				},
+				target: 'coordinates'
+			});
+			var printBt = new ol.control.Print({
+				target: 'toolbar'
+			});
+			
+			map.addControl(scaleline);
+			map.addControl(scalelineBt);
+			map.addControl(zoom);
+			map.addControl(zoomslider);
+			map.addControl(zoomBt);
+			map.addControl(mouseposition);
+			map.addControl(printBt);			
+		}
+		document.addEventListener('DOMContentLoaded', init);
+		</script>
+	</head>
+	<body>
+	<!-- Visualization -->
+	<div id="header">
+		<div id="title">
+			<h1>Map Wizard</h1>			
+		</div>
+		<div id="logo">
+			<img src="./css/images/logo.jpg" alt="logo" >
+		</div>
+		<div id="button">
+			<input type="button" value="Preset Data" onclick="window.location.href='./index.html'">
+			<input type="button" value="Geoserver" onclick="window.location.href='./geoserver.html'">
+			<input type="button" value="Custom Data" onclick="window.location.href='./custom.html'">			
+			<input type="button" value="Info" onclick="window.location.href='./info.html'">
+		</div>
+	</div>
+	<div class="map-container">
+		<h1 class="slogan">Custom Data Wizard</h1>	
+		<div id="toolbar" class="toolbar"></div>
+		<div id="layertree" class="layertree"></div>
+		<div id="map" class="map">
+			<!--div class="nosupport">Your browser doesn't seem to support this application. Please, update it.</div-->
+		</div>
+		<div class="notification-bar">
+			<div id="messageBar" class="message-bar">Use <code>Alt+Shift+Drag</code> to rotate the map.</div>
+			<div id="coordinates"></div>
+		</div>
+	</div>
+	<div id="addvector" class="toggleable" style="display: none;">
+		<form id="addvector_form" class="addlayer">
+			<p>Add Vector layer</p>
+			<table>				
+				<tr>
+					<td>Vector file:</td>
+					<td><input name="file" type="file" required="required"></td>
+				</tr>
+				<tr>
+					<td>Display name:</td>
+					<td><input name="displayname" type="text"></td>
+				</tr>
+				<tr>
+					<td>Format:</td>
+					<td><select name="format" required="required">
+						<option value="geojson">GeoJSON</option>
+						<option value="topojson">TopoJSON</option>
+						<option value="kml">KML</option>
+						<option value="osm">OSM</option>
+					</select></td>
+				</tr>
+				<tr>
+					<td>Projection:</td>
+					<td><input name="projection" type="text"></td>
+				</tr>
+				<tr>
+					<td><input type="submit" value="Add layer"></td>
+					<td><input type="button" value="Cancel" onclick="this.form.parentNode.style.display = 'none'"></td>
+				</tr>
+			</table>
+		</form>
+	</div>	
+	<div id="footer">
+		Copyright &copy; Lampakis Mironas. All rights reserved.<br>
+		Supervised by Dr. Krassanakis Basileios, Dr. Tsatsaris Andreas.	
+	</div>	
+  </body>
+</html>

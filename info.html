@@ -1,0 +1,60 @@
+<!doctype html>	
+<html lang="en">
+	<head>
+		<link rel="stylesheet" href="./css/layertree.css" type="text/css">
+		<link rel="stylesheet" href="./css/style.css" type="text/css">
+
+		<title>Map Wizard</title>
+	</head>
+	<body>
+	<!-- Visualization -->
+	<div id="header">
+		<div id="title">
+			<h1>Map Wizard</h1>			
+		</div>
+		<div id="logo">
+			<img src="./css/images/logo.jpg" alt="logo" >
+		</div>
+		<div id="button">
+			<input type="button" value="Preset Data" onclick="window.location.href='./index.html'">
+			<input type="button" value="Geoserver" onclick="window.location.href='./geoserver.html'">
+			<input type="button" value="Custom Data" onclick="window.location.href='./custom.html'">			
+			<input type="button" value="Info" onclick="window.location.href='./info.html'">
+		</div>
+	</div>
+	<div class="map-container">
+		<h1 class="slogan">Wizard Info</h1>	
+		<div>
+		<p>The main goal is to highlight a methodological approach, based on the principles and methods of cartographic visualization, for the creation of an online cartographic platform. There will be created 
+		a guided application that will provide the right map symbols when user wants to show a phenomenon. It appears that solving the problem of visualization of a geo-spatial phenomenon can be simulated by 
+		a dynamic algorithmic process. This process is based on parameters related to the nature of that phenomenon and its data. So the application will be able to accept as input elements, the nature of these data 
+		and as a result will indicate the appropriate symbolism method.</p>
+		<h5>Preset Data.</h5>		
+		<p>The first menu is Preset Data which is a simple version of this application. By selecting it so, in this menu the user is able through some simple selections to choose the correct symbols for the creation of the map. 
+		These selections are based on the nature of data that are going to be displayed on the map. There is a submenu in the left with the available steps in this menu:  Data type, Hierarchy, Processed data, Summary. Taking into account available data 
+		the user must select the correct data type to procced. Next is the hierarchy type selection. The third step is available only when the user has selected Area as Data type and Ordered/Interval as Hierarchy. 
+		At this step the user should made an appropriate selection the available data are Primary or they are produced. The final step is an overview of the selections that made, just before submitting. During all steps 
+		the user has the ability to turn back and make corrections. As result some maps in jpg format will be displayed with the right symbolization.</p>				
+		<h5>Geoserver</h5>
+		<p>The GeoServer is a more complicated version of this application. Same as before the user can make simple selections based on data that will be displayed on map. In this version the result will be some layers with 
+		the right symbolization that will appear in the map.</p>		
+		<p>In the right there is the map area where the results will be displayed. Also there is a submenu on the left. Below this submenu is an area with the layers of the map, the layers section. From this submenu 
+		the user can choose New to create a new layer. A new simple pop-up menu will appear and the user will be able to do the selections based on data as foretold at Preset data. By selecting a layer from the 
+		layers section and then choosing Delete the user can delete a layer. In addition the next buttons, Scale and Zoom, toggle control elements in the map area. Last is a Print button which opens a new tab on browser 
+		with the current map. In addition the user can handle the layers in the layer section there is where all imported layers are appeared when the user makes the selections. By clicking a layer and then the checkbox 
+		in front of its name, the user can toggle its visibility of the layer. And this can be done and by moving the slider under the layer, this will change the opacity of the layer. Also the user is able to change 
+		the order of the layers, can be achieved by dragging and dropping them in the layer section. Last the user is able to change the name of a layer by double clicking its name.</p>
+		<h5>Custom Data.</h5>		
+		<p>As before this section has almost the same functionality with the above one. But there is some slightly differences because the user is not able to make any selections about data and how to represent them. 
+		This part of the application has the same backbone of the previous one but it is not connected to a server, the user is able to upload data in a correct file format. The file type can be GeoJSON, TopoJSON, KML and OSM. 
+		Also during the upload the user must select the projection. The difference in this menu is the functionality of New button, which opens a different pop-up menu. At this point data only will be displayed in the map 
+		with no styling. This part is useful because the user can test a data set, also in future development it will be possible the user to upload a sample data set and the application to provide the right symbolization 
+		for that data set.</p>
+		</div>
+		<div id="footer">
+		Copyright &copy; Lampakis Mironas. All rights reserved.<br>
+		Supervised by Dr. Krassanakis Basileios, Dr. Tsatsaris Andreas.	
+		</div>
+	</div>
+  </body>
+</html>
