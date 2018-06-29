@@ -1,270 +1,60 @@
 <!doctype html>	
 <html lang="en">
-	<head>	
+	<head>
 		<link rel="stylesheet" href="./css/layertree.css" type="text/css">
 		<link rel="stylesheet" href="./css/style.css" type="text/css">
-		<link rel="stylesheet" href="./css/jquery.steps.css" type="text/css">
-		<link rel="stylesheet" href="./css/jquery-ui.css" type="text/css">		
-		<script src="./js/jquery-1.9.1.min.js" type="text/javascript"></script> 
-		<script src="./js/jquery.steps.js" type="text/javascript"></script>
-		<script src="./js/jquery.validate.js" type="text/javascript"></script>
-		<script src="./js/jquery-ui.js" type="text/javascript"></script>
-		
+
 		<title>Map Wizard</title>
 	</head>
 	<body>
 	<!-- Visualization -->
 	<div id="header">
 		<div id="title">
-			<h1>Map Wizard</h1>			
+			<h1>Map Visualization Wizard</h1>			
 		</div>
 		<div id="logo">
 			<img src="./css/images/logo.jpg" alt="logo" >
 		</div>
 		<div id="button">
-			<input type="button" value="Preset Data" onclick="window.location.href='./index.html'">
+			<input type="button" value="Home" onclick="window.location.href='./index.html'">
+			<input type="button" value="Sample Data" onclick="window.location.href='./sample.html'">
 			<input type="button" value="Geoserver" onclick="window.location.href='./geoserver.html'">
-			<input type="button" value="Custom Data" onclick="window.location.href='./custom.html'">			
-			<input type="button" value="Info" onclick="window.location.href='./info.html'">			
-		</div>		
+			<input type="button" value="Custom Data" onclick="window.location.href='./custom.html'">	
+		</div>
 	</div>
 	<div class="map-container">
-		<div class="content">
-			<h1 class="slogan">Preset Data Wizard</h1>	
-			<script>
-				// Wizard checkings
-				$(function ()
-				{
-					var form = $("#wizard").show();
-					form.steps({
-						headerTag: "h2",
-						bodyTag: "section",
-						transitionEffect: "slideLeft",
-						stepsOrientation: "vertical",
-						onStepChanging: function (event, currentIndex, newIndex)
-						{
-							// Allways allow previous action even if the current form is not valid!
-							if (currentIndex > newIndex)
-							{
-								return true;
-							}
-							// Needed in some cases if the user went back (clean up)
-							if (currentIndex < newIndex)
-							{
-								// To remove error styles
-								form.find(".body:eq(" + newIndex + ") label.error").remove();
-								form.find(".body:eq(" + newIndex + ") .error").removeClass("error");
-							}				
-							return form.valid();
-						},
-						onStepChanged: function (event, currentIndex, priorIndex)
-						{			
-							var dT = $('input[name="dataType"]:checked').val();
-							var hD = $('input[name="hierarchyData"]:checked').val();
-							if (currentIndex === 2 && (dT != "Area" || (dT === "Area" && hD === "Nominal")))
-							{
-								if (priorIndex === 3)
-								{
-									// Used to skip the "Processed Data" step if user has not area data OR area data are nominal, and wants to the previous step.
-									form.steps("previous");
-								}
-								else 
-								{
-									// Used to skip the "Processed Data" step if user has not area data OR area .
-									form.steps("next");
-								}
-							}
-							
-							// Create results
-							var result = "<p>During the selection process the data you choose are:</p>";
-							result = result.concat("<p>"+$('input[name="dataType"]:checked').val()+"</p>");
-							result = result.concat("<p>"+$('input[name="hierarchyData"]:checked').val()+"</p>");  
-							if ($('input[name="processedData"]:checked').size() > 0 )
-							{
-								result = result.concat("<p>"+$('input[name="processedData"]:checked').val()+"</p>"); 
-							}
-							result = result.concat("<p>At this point you can finalize your decision by submitting the selected data. Also you are able to go back at any step and change any selection you made.</p>");
-							$("#results").html(result);
-						},
-						onFinishing: function (event, currentIndex)
-						{
-							return form.valid();
-						},
-						onFinished: function (event, currentIndex)
-						{
-							var form = $(this);   
-							form.submit();
-						}
-					}).validate({
-						errorPlacement: function errorPlacement(error, element) { element.before(error); },
-						// Make fields required
-						rules: {					
-							dataType: {
-									required: true
-							},
-							hierarchyData: {
-									required: true
-							},
-							// processedData is required only if area and ordered_interval are selected
-							processedData: {
-								required: function(element) {
-									return ($('input[name="dataType"]:checked').val() === "Area" && $('input[name="hierarchyData"]:checked').val() === "Ordered_Interval");
-								}
-							}
-						}
-					});
-				});
-				
-				// If there are submitted data
-				map = false;
-				if (window.location.href.indexOf("?") > -1) 
-				{ 
-					// Get url parameters			
-					$.urlParam = function(name){
-						var params = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
-						if (params==null)
-						{
-						   return null;
-						}
-						else
-						{
-						   return params[1] || 0;
-						}
-					}
-					
-					// Choose right maps				
-					switch ($.urlParam('dataType')) 
-					{
-						case 'Points':
-							if ($.urlParam('hierarchyData') === 'Nominal')
-							{
-								map = '<img src="./maps/point_nominal_color_hue.png" alt="Point Nominal Color Hue">';
-								map += '<img src="./maps/point_nominal_shape.png" alt="Point Nominal Shape">';
-								map += '<img src="./maps/point_nominal_orientation.png" alt="Point Nominal Orientation">';
-								map += '<img src="./maps/point_nominal_pics.png" alt="Point Nominal Pics">';
-							}
-							else
-							{
-								map = '<img src="./maps/point_interval_color_value.png" alt="Point Interval/Ordinal Color Value">';
-								map += '<img src="./maps/point_interval_size.png" alt="Point Interval/Ordinal Size">';							
-							}
-							break;
-						case 'Lines':
-							if ($.urlParam('hierarchyData') === 'Nominal')
-							{
-								map = '<img src="./maps/line_nominal_color_hue.png" alt="Line Nominal Color Hue">';
-								map += '<img src="./maps/line_nominal_shape.png" alt="Line Nominal Shape">';
-							}
-							else
-							{
-								map = '<img src="./maps/line_interval_color_value.png" alt="Line Interval/Ordinal Color Value">';
-								map += '<img src="./maps/line_interval_size.png" alt="Line Interval/Ordinal Size">';
-							}
-							break;
-						case 'Area':
-							if ($.urlParam('hierarchyData') === 'Nominal')
-							{
-								map = '<img src="./maps/area_nominal_color_hue.png" alt="Area Nominal Color Hue">';
-								map += '<img src="./maps/area_nominal_orientation.png" alt="Area Nominal Orientation">';
-								map += '<img src="./maps/area_nominal_shape.png" alt="Area Nominal Shape">';
-							}
-							else
-							{
-								if ($.urlParam('processedData') === 'Primary')
-								{
-									map = '<img src="./maps/area_interval_size.png" alt="Point Interval/Ordinal Primary Size">';
-								}
-								else
-								{
-									map = '<img src="./maps/area_interval_color_value.png" alt="Area Interval/Ordinal Produced Color Value">';
-								}
-							}
-							break;
-					}
-				}
-			</script>
-			<div id="maps" style="display:none;" title="Maps">
-				<script>
-					if (map != false)
-					{
-						$("#maps").html(map);
-						$("#maps").dialog({
-							  width: 840,
-							  position: { 
-								my: "top", 
-								at: "center", 
-								of: button 
-							  },
-							  show: {
-								effect: "blind",
-								duration: 1000
-							  },
-							  hide: {
-								effect: "explode",
-								duration: 2000
-							  }
-							});
-					}
-				</script>
-			</div>
-			<form id="wizard" action="#" method="get">
-				<h2>Data type</h2>
-				<section>
-					<p>A spatial distribution is the arrangement of a phenomenon across the Earth's surface and a graphical display of such an arrangement is an important tool 
-					in geographical and environmental statistics. A graphical display of a spatial distribution may summarize raw data directly or may reflect the outcome of more 
-					sophisticated data analysis. Many different aspects of a phenomenon can be shown in a single graphical display by using a suitable choice of different colors to 
-					represent differences. The classification of geographic phenomena is divided into five categories according to their dimensions: point, line, area, volumetric or 
-					three-dimensional and dynamic or multidimensional.</p>
-					<p>Please choose your data type:</p>				
-					<label>
-					  <input type="radio" id="dataType" name="dataType" value="Points" class="required">
-					  Points
-					</label>
-					<label>
-					  <input type="radio" id="dataType" name="dataType" value="Lines">
-					  Lines
-					</label>
-					<label for="dataType2">
-					  <input type="radio" id="dataType" name="dataType" value="Area">
-					  Area
-					</label>
-				</section>
-				<h2>Hierarchy</h2>
-				<section>		
-					<p>Except the separation of geographic phenomena according to spatial entity models, there is also a separation in hierarchical ranges: nominal, ordered, and interval/ratio.</p>
-					<p>Please choose the hierarchy of the data:</p>				
-					<label>
-					  <input type="radio" id="hierarchyData" name="hierarchyData" value="Nominal">
-					  Nominal
-					</label>
-					<label>
-					  <input type="radio" id="hierarchyData" name="hierarchyData" value="Ordered_Interval">
-					  Ordered/Interval
-					</label>				
-				</section>
-				<h2>Processed data</h2>
-				<section>
-					<p>Primary data are those collected for "specific" purpose by the researcher for his research. While secondary data are statistical and processed items</p>
-					<p>Please choose the hierarchy of the data:</p>
-					<label>
-					  <input type="radio" id="processedData" name="processedData" value="Primary">
-					  Primary Data
-					</label>
-					<label>
-					  <input type="radio" id="processedData" name="processedData" value="Produced">
-					  Produced Data
-					</label>
-				</section>
-				<h2>Summary</h2>
-				<section>				
-					<div id="results"></div>
-				</section>
-			</form>
+		<h1 class="slogan">Wizard Info</h1>	
+		<h4 class="slogan">To run fully this wizard you must use <font color='red'>Chrome</font></h4>	
+		<div>
+		<p>This Wizard is an online tool that supports cartographic education. Aim of this cartographic platform is to guide users to select right symbols during the creation of their maps. 
+		This can be achieved by highlighting a methodological approach, based cartographic visualization principles and methods. A dynamic algorithmic process will be a ration method to encounter problem of visualizing a geospatial phenomenon. 
+		This process is based on parameters related to the nature of that phenomenon and the data which are provided from the user. Thus this application accepts them as input elements, and as a result indicates an appropriate symbolism. 
+		Due to the needs of this project used various geographical data, which are retrieved from http://geodata.gov.gr/ and http://www.naturalearthdata.com</p>
+		<h5>Sample Data.</h5>		
+		<p>The first menu is Sample Data which is a simple version of this application. In this menu users are able, through a series of selections, to choose correct symbols for their maps. These selections are based on the nature of data that are going to be displayed on the map. 
+		First a submenu in the left is available and contains steps that users will have to follow. These steps are: Data type, Hierarchy, Processed data, Summary. Then taking into account the data users want to represent, they provide suitable information in every step. 
+		It is worth mentioning that step Processed is available only when Data type: Area and Hierarchy: Ordinal/Interval are selected. Also, at this step an appropriate data selection is Primary or Derived. Then an overview step follows to check all selections. 
+		Also during this process users are able to turn back and for corrections. Finally as a result, maps images will be displayed providing symbolization solutions.</p>				
+		<h5>Geoserver</h5>
+		<p>TThis menu is a more complicated version than the pervious one. As before users can make selections based on data’s nature. 
+		In this version results will be layers with the right symbolization according to selections made.</p>		
+		<p>Furthermore, a map with information from Geoserver is located at the right side of the page, and at this section result layers are displayed. 
+		First a submenu is on the left side, there users can choose New Button to create a new layer. Then a simple pop-up menu will appear and they will be able to make the selections based on 
+		data, as foretold at Sample Data. Selecting a layer from the layers section (area below the submenu) and then choosing Delete, users can delete that layer. In addition Scale and Zoom buttons 
+		toggle control elements in the map area. Last is a Print Button which opens a new tab on browser with the current map. In addition users can handle visibility settings of all layers, 
+		by clicking a layer and then the checkbox in front of its name; this toggles the layer’s visibility. Also another way is by moving the slider bar under that layer, which will change the 
+		opacity. Except that, users can change order of the layers. Simply by dragging and dropping them. Finally users can rename layers by double clicking their names.</p>
+		<h5>Custom Data.</h5>		
+		<p>This section has similar functionality with Geoserver. There are limitations regarding data selections and representation. This part is connected to an OpenStreetMap tile server, 
+		and users are able to upload data in a correct file format. File types can be GeoJSON, TopoJSON, KML and OSM. Also users must select a projection. A difference in this menu is New Button 
+		functionality, which is connected to a different pop-up menu. At this point, data only will be displayed in the map with no styling. This part is useful because users can test their data sets, 
+		also in future development it will be possible for users to upload a sample data set and the application will provide right symbolization for that specific data set.</p>
 		</div>
-    </div>
-	<div id="footer">
-		Copyright &copy; Lampakis Mironas. All rights reserved.<br>
-		Supervised by Dr. Krassanakis Basileios, Dr. Tsatsaris Andreas.	
-	</div>		
+		<div id="footer">
+		Copyright &copy; 2017 Mironas Lampakis. All rights reserved.<br>
+		This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.<br>
+		Supervised by Dr. Andreas Tsatsaris, Dr. Vasilis Krassanakis.	
+		</div>
+	</div>
   </body>
 </html>

@@ -1,0 +1,329 @@
+<!doctype html>	
+<html lang="en">
+	<head>	
+		<link rel="stylesheet" href="./css/layertree.css" type="text/css">
+		<link rel="stylesheet" href="./css/style.css" type="text/css">
+		<link rel="stylesheet" href="./css/jquery.steps.css" type="text/css">
+		<link rel="stylesheet" href="./css/jquery-ui.css" type="text/css">		
+		<script src="./js/jquery-1.9.1.min.js" type="text/javascript"></script> 
+		<script src="./js/jquery.steps.js" type="text/javascript"></script>
+		<script src="./js/jquery.validate.js" type="text/javascript"></script>
+		<script src="./js/jquery-ui.js" type="text/javascript"></script>
+		
+		<title>Map Wizard</title>
+	</head>
+	<body>
+	<!-- Visualization -->
+	<div id="header">
+		<div id="title">
+			<h1>Map Visualization Wizard</h1>			
+		</div>
+		<div id="logo">
+			<img src="./css/images/logo.jpg" alt="logo" >
+		</div>
+		<div id="button">
+			<input type="button" value="Home" onclick="window.location.href='./index.html'">
+			<input type="button" value="Sample Data" onclick="window.location.href='./sample.html'">
+			<input type="button" value="Geoserver" onclick="window.location.href='./geoserver.html'">
+			<input type="button" value="Custom Data" onclick="window.location.href='./custom.html'">								
+		</div>		
+	</div>
+	<div class="map-container">
+		<div class="content">
+			<h1 class="slogan">Sample Data Wizard</h1>	
+			<p>This is the first version of the Wizard, which aims to help the cartographic visualization. 
+			Users have to make simple selections based on data they want to display on their maps. 
+			Thus map images with alternative solutions will be appeared.</p>
+			<script>
+				// Wizard checkings
+				$(function ()
+				{
+					var form = $("#wizard").show();
+					form.steps({
+						headerTag: "h2",
+						bodyTag: "section",
+						transitionEffect: "slideLeft",
+						stepsOrientation: "vertical",
+						onStepChanging: function (event, currentIndex, newIndex)
+						{
+							// Allways allow previous action even if the current form is not valid!
+							if (currentIndex > newIndex)
+							{
+								return true;
+							}
+							// Needed in some cases if the user went back (clean up)
+							if (currentIndex < newIndex)
+							{
+								// To remove error styles
+								form.find(".body:eq(" + newIndex + ") label.error").remove();
+								form.find(".body:eq(" + newIndex + ") .error").removeClass("error");
+							}				
+							return form.valid();
+						},
+						onStepChanged: function (event, currentIndex, priorIndex)
+						{			
+							var dT = $('input[name="dataType"]:checked').val();
+							var hD = $('input[name="hierarchyData"]:checked').val();
+							if (currentIndex === 2 && (dT != "Area" || (dT === "Area" && hD === "Nominal")))
+							{
+								if (priorIndex === 3)
+								{
+									// Used to skip the "Processed Data" step if user has not area data OR area data are nominal, and wants to the previous step.
+									form.steps("previous");
+								}
+								else 
+								{
+									// Used to skip the "Processed Data" step if user has not area data OR area .
+									form.steps("next");
+								}
+							}
+							
+							// Create results
+							var result = "<p>During the selection process the data you chose are:</p>";
+							result = result.concat("<p>"+$('input[name="dataType"]:checked').val()+"</p>");
+							result = result.concat("<p>"+$('input[name="hierarchyData"]:checked').val()+"</p>");  
+							if ($('input[name="processedData"]:checked').size() > 0 )
+							{
+								result = result.concat("<p>"+$('input[name="processedData"]:checked').val()+"</p>"); 
+							}
+							result = result.concat("<p>At this point you can finalize your decision by submitting selected data. Also you are able to go back at any step and change any selection you made.</p>");
+							$("#results").html(result);
+						},
+						onFinishing: function (event, currentIndex)
+						{
+							return form.valid();
+						},
+						onFinished: function (event, currentIndex)
+						{
+							var form = $(this);   
+							form.submit();
+						}
+					}).validate({
+						errorPlacement: function errorPlacement(error, element) { element.before(error); },
+						// Make fields required
+						rules: {					
+							dataType: {
+									required: true
+							},
+							hierarchyData: {
+									required: true
+							},
+							// processedData is required only if area and Ordinal_interval are selected
+							processedData: {
+								required: function(element) {
+									return ($('input[name="dataType"]:checked').val() === "Area" && $('input[name="hierarchyData"]:checked').val() === "Ordinal_Interval");
+								}
+							}
+						}
+					});
+				});
+				
+				// If there are submitted data
+				map = false;
+				if (window.location.href.indexOf("?") > -1) 
+				{ 
+					// Get url parameters			
+					$.urlParam = function(name){
+						var params = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+						if (params==null)
+						{
+						   return null;
+						}
+						else
+						{
+						   return params[1] || 0;
+						}
+					}
+					
+					// Choose right maps				
+					switch ($.urlParam('dataType')) 
+					{
+						case 'Points':
+							if ($.urlParam('hierarchyData') === 'Nominal')
+							{
+								map = '<b>Data: Point Nominal - Variable: Color Hue</b><img src="./maps/point_nominal_color_hue.png" alt="Point Nominal Color Hue"><br><br>';
+								map += '<b>Data: Point Nominal - Variable: Shape</b><img src="./maps/point_nominal_shape.png" alt="Point Nominal Shape"><br><br>';
+								map += '<b>Data: Point Nominal - Variable: Orientation</b><img src="./maps/point_nominal_orientation.png" alt="Point Nominal Orientation"><br><br>';
+								map += '<b>Data: Point Nominal - Variable: Pics</b><img src="./maps/point_nominal_pics.png" alt="Point Nominal Pics"><br><br>';
+							}
+							else
+							{
+								map = '<b>Data: Point Interval/Ordinal - Variable: Color Value</b><img src="./maps/point_interval_color_value.png" alt="Point Interval/Ordinal Color Value"><br><br>';
+								map += '<b>Data: Point Interval/Ordinal - Variable: Size</b><img src="./maps/point_interval_size.png" alt="Point Interval/Ordinal Size"><br><br>';							
+							}
+							break;
+						case 'Lines':
+							if ($.urlParam('hierarchyData') === 'Nominal')
+							{
+								map = '<b>Data: Line Nominal - Variable: Color Hue</b><img src="./maps/line_nominal_color_hue.png" alt="Line Nominal Color Hue"><br><br>';
+								map += '<b>Data: Line Nominal - Variable: Shape</b><img src="./maps/line_nominal_shape.png" alt="Line Nominal Shape"><br><br>';
+							}
+							else
+							{
+								map = '<b>Data: Line Interval/Ordinal - Variable: Color Value</b><img src="./maps/line_interval_color_value.png" alt="Line Interval/Ordinal Color Value"><br><br>';
+								map += '<b>Data: Line Interval/Ordinal - Variable: Size</b><img src="./maps/line_interval_size.png" alt="Line Interval/Ordinal Size"><br><br>';
+							}
+							break;
+						case 'Area':
+							if ($.urlParam('hierarchyData') === 'Nominal')
+							{
+								map = '<b>Data: Area Nominal - Variable: Color Hue</b><img src="./maps/area_nominal_color_hue.png" alt="Area Nominal Color Hue"><br><br>';
+								map += '<b>Data: Area Nominal - Variable: Orientation</b><img src="./maps/area_nominal_orientation.png" alt="Area Nominal Orientation"><br><br>';
+								map += '<b>Data: Area Nominal - Variable: Shape</b><img src="./maps/area_nominal_shape.png" alt="Area Nominal Shape"><br><br>';
+							}
+							else
+							{
+								if ($.urlParam('processedData') === 'Primary')
+								{
+									map = '<b>Data: Point Interval/Ordinal Primary - Variable: Size</b><img src="./maps/area_interval_size.png" alt="Point Interval/Ordinal Primary Size"><br><br>';
+								}
+								else
+								{
+									map = '<b>Data: Area Interval/Ordinal Derived - Variable: Color Value</b><img src="./maps/area_interval_color_value.png" alt="Area Interval/Ordinal Derived Color Value"><br><br>';
+								}
+							}
+							break;
+					}
+				}
+			</script>
+			<div id="maps" style="display:none;" title="Map Examples">
+				<script>
+					if (map != false)
+					{
+						$("#maps").html(map);
+						$("#maps").dialog({
+							  width: 840,
+							  position: { 
+								my: "top", 
+								at: "center", 
+								of: button 
+							  },
+							  show: {
+								effect: "blind",
+								duration: 1000
+							  },
+							  hide: {
+								effect: "explode",
+								duration: 2000
+							  }
+							});
+					}
+				</script>
+			</div>
+			<form id="wizard" action="#" method="get">
+				<h2>Data type</h2>
+				<section>					
+					<p>A spatial distribution is the way a phenomenon is allocated in space. Their visualization at maps is achieved due to their different attributes. 
+					The classification of geographic phenomena is divided into five categories according to their dimensions: point, line, area, volumetric or three-dimensional and dynamic or multidimensional. 
+					Usually only the three first are used at the most maps.</p>
+					<p>Please choose your data type:</p>				
+					<table>
+					<tr>
+					<td>
+					<label>
+					  <input type="radio" id="dataType" name="dataType" value="Points" class="required">
+					  Points					  
+					</label>
+					</td>
+					<td>
+						<img src="css/images/points.jpg" alt="points">					
+					</td>
+					</tr>
+					<tr>
+					<td>
+					<label>
+					  <input type="radio" id="dataType" name="dataType" value="Lines">
+					  Lines					  
+					</label>
+					</td>
+					<td>
+						<img src="css/images/lines.jpg" alt="lines">
+					</td>
+					</tr>
+					<tr>
+					<td>
+					<label for="dataType2">
+					  <input type="radio" id="dataType" name="dataType" value="Area">
+					  Area					  
+					</label>
+					</td>
+					<td>
+						<img src="css/images/area.jpg" alt="area">
+					</td>
+					</tr>
+					</table>
+				</section>
+				<h2>Hierarchy</h2>
+				<section>		
+					<p>Categorization of geographic phenomena can be achieved according to their characteristics. Also levels of data measurement are divided into three scales: nominal, ordinal, and interval. 
+					More specifically ordinal and interval are very similar, for this reason will be used as one scale.</p>
+					<p>Please choose your data hierarchy:</p>				
+					<table>
+					<tr>
+					<td>
+					<label>
+					  <input type="radio" id="hierarchyData" name="hierarchyData" value="Nominal">
+					  Nominal
+					</label>
+					</td>
+					<td>
+						<img src="css/images/nominal.jpg" alt="nominal">					
+					</td>
+					</tr>
+					<tr>
+					<td>
+					<label>
+					  <input type="radio" id="hierarchyData" name="hierarchyData" value="Ordinal_Interval">
+					  Ordinal/Interval
+					</label>
+					</td>
+					<td>
+						<img src="css/images/interval.jpg" alt="interval">
+					</td>
+					</tr>
+					</table>
+				</section>
+				<h2>Processed data</h2>
+				<section>
+					<p>Data are divided into Primary and Derived. Usually primary are data collected for specific purpose by a researcher. 
+					In the contrary derived data are resulting from the process of primary data such statistical analysis.</p>
+					<p>Please choose your data nature:</p>
+					<table>
+					<tr>
+					<td>
+					<label>
+					  <input type="radio" id="processedData" name="processedData" value="Primary">
+					  Primary Data
+					</label>
+					</td>
+					<td>
+						<img src="css/images/primary.jpg" alt="primary">					
+					</td>
+					</tr>
+					<tr>
+					<td>
+					<label>
+					  <input type="radio" id="processedData" name="processedData" value="Derived">
+					  Derived Data
+					</label>
+					</td>
+					<td>
+						<img src="css/images/derived.jpg" alt="derived">
+					</td>
+					</tr>
+					</table>
+				</section>
+				<h2>Summary</h2>
+				<section>				
+					<div id="results"></div>
+				</section>
+			</form>
+		</div>
+    </div>
+	<div id="footer">
+		Copyright &copy; 2017 Mironas Lampakis. All rights reserved.<br>
+		This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.<br>
+		Supervised by Dr. Andreas Tsatsaris, Dr. Vasilis Krassanakis.	
+	</div>		
+  </body>
+</html>

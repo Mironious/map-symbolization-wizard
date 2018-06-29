@@ -28,13 +28,25 @@
 							format: new ol.format.GeoJSON()
 						}),
 						name: 'World'
+					}),
+					new ol.layer.Tile({
+						source: new ol.source.TileWMS({
+							url: 'http://localhost:8080/geoserver/wms',        
+							params: {							
+								layers: 'MapWizard:Ocean',
+							},							
+							crossOrigin: 'anonymous',
+							projection : 'EPSG:4326',
+							serverType: 'geoserver',                    
+						}),
+						name: 'Ocean'
 					}),*/
 					new ol.layer.Tile({
 						source: new ol.source.TileWMS({
-							url: 'http://localhost:8080/geoserver/wms',
-							params: {
+							url: 'http://localhost:8080/geoserver/wms',        
+							params: {							
 								layers: 'MapWizard:World',
-							},
+							},							
 							crossOrigin: 'anonymous',
 							projection : 'EPSG:4326',
 							serverType: 'geoserver',                    
@@ -46,13 +58,13 @@
 							url: 'http://localhost:8080/geoserver/wms',
 							params: {
 								layers: 'MapWizard:Greece2',
-							},
+							},							
 							crossOrigin: 'anonymous',
 							projection : 'EPSG:4326',
-							serverType: 'geoserver',                    
+							serverType: 'geoserver',   							
 						}),
-						name: 'Greece2'
-					}),
+						name: 'Greece'
+					})/*,
 					new ol.layer.Tile({
 						source: new ol.source.TileWMS({
 							url: 'http://localhost:8080/geoserver/wms',
@@ -76,7 +88,7 @@
 							serverType: 'geoserver',                    
 						}),
 						name: 'Coastline'
-					})
+					})*/
 				],
 				view: new ol.View({
 					//Map center to Athens
@@ -89,9 +101,9 @@
 			//Initial layers
 			var tree = new layerTree({map: map, target: 'layertree', messages: 'messageBar'})
 				.createRegistry(map.getLayers().item(0))
-				.createRegistry(map.getLayers().item(1))
-				.createRegistry(map.getLayers().item(2))
-				.createRegistry(map.getLayers().item(3));
+				.createRegistry(map.getLayers().item(1));
+				//.createRegistry(map.getLayers().item(2));
+				//.createRegistry(map.getLayers().item(3));
 			document.getElementById('addwms_form').addEventListener('submit', function (evt) {
 				evt.preventDefault();
 				tree.addWmsLayer(this);
@@ -136,7 +148,7 @@
 			window.invalidate_input = function() {
 				var dt = $('input[name=dataType]:checked').val();
 				var ht = $('input[name=hierarchyData]:checked').val();
-				if (dt == "Area" && ht == "Ordered_Interval")
+				if (dt == "Area" && ht == "Ordinal_Interval")
 				{
 					$('#processedData1').removeAttr('disabled');
 					$('#processedData2').removeAttr('disabled');
@@ -158,20 +170,22 @@
 	<!-- Visualization -->
 	<div id="header">
 		<div id="title">
-			<h1>Map Wizard</h1>			
+			<h1>Map Visualization Wizard</h1>			
 		</div>
 		<div id="logo">
 			<img src="./css/images/logo.jpg" alt="logo" >
 		</div>
 		<div id="button">
-			<input type="button" value="Preset Data" onclick="window.location.href='./index.html'">
+			<input type="button" value="Home" onclick="window.location.href='./index.html'">
+			<input type="button" value="Sample Data" onclick="window.location.href='./sample.html'">
 			<input type="button" value="Geoserver" onclick="window.location.href='./geoserver.html'">
-			<input type="button" value="Custom Data" onclick="window.location.href='./custom.html'">			
-			<input type="button" value="Info" onclick="window.location.href='./info.html'">
+			<input type="button" value="Custom Data" onclick="window.location.href='./custom.html'">	
 		</div>
 	</div>
 	<div class="map-container">
 		<h1 class="slogan">Geoserver Wizard</h1>	
+		<p>This is the second version of the Wizard. Also here, users can make simple selections based on data they want to display on their maps. 
+		In this version, with the help of a Geoserver, the result will be dynamic layers on a map with the appropriate symbolization.</p>
 	<div id="toolbar" class="toolbar"></div>
 		<div id="layertree" class="layertree"></div>
 		<div id="map" class="map">
@@ -196,13 +210,13 @@
 				<tr>
 					<td>Hierarchy:</td>
 					<td><input name="hierarchyData" type="radio" value="Nominal" required="required">Nominal
-						<input name="hierarchyData" type="radio" value="Ordered_Interval">Ordered/Interval
+						<input name="hierarchyData" type="radio" value="Ordinal_Interval">Ordinal/Interval
 					</td>
 				</tr>
 				<tr>
 					<td>Processed:</td>
 					<td><input name="processedData" id="processedData1" type="radio" value="Primary" required="required" disabled>Primary
-						<input name="processedData" id="processedData2" type="radio" value="Produced" disabled>Produced
+						<input name="processedData" id="processedData2" type="radio" value="Derived" disabled>Derived
 					</td>
 				</tr>
 				<tr>
@@ -213,8 +227,9 @@
 		</form>
 	</div>	
 	<div id="footer">
-		Copyright &copy; Lampakis Mironas. All rights reserved.<br>
-		Supervised by Dr. Krassanakis Basileios, Dr. Tsatsaris Andreas.	
+		Copyright &copy; 2017 Mironas Lampakis. All rights reserved.<br>
+		This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.<br>
+		Supervised by Dr. Andreas Tsatsaris, Dr. Vasilis Krassanakis.	
 	</div>	
   </body>
 </html>
